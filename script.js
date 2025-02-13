@@ -77,7 +77,7 @@ gl.uniform4f(colorLocation, Math.random(), Math.random(), Math.random(), 1);
 
 function drawScene(){
 	// Set the rotation.
-	const radAngle = degToRad(Number(rotation.value));
+	const radAngle = degToRad(Number(rotation.value)-90);
 	gl.uniform2fv(rotationLocation, [Math.cos(radAngle),Math.sin(radAngle)]);
 
 	// Set the translation.

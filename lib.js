@@ -12,7 +12,7 @@ void main() {
   //Rotate the position
   vec2 rotatedPosition = vec2(
      a_position.x * u_rotation.y + a_position.y * u_rotation.x,
-     a_position.x * u_rotation.y - a_position.x * u_rotation.x
+     a_position.y * u_rotation.y - a_position.x * u_rotation.x
   );
   // Add in the translation
   vec2 position = rotatedPosition + u_translation;
