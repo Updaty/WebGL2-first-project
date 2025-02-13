@@ -1,0 +1,12 @@
+{
+  "name": "webgl2-first-project",
+  "version": "1.0.0",
+  "description": "Just a test",
+  "main": "first_webgl2.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "start first_webgl2.html"
+  },
+  "author": "",
+  "license": "ISC"
+}
