@@ -1,4 +1,7 @@
 'use strict';
+
+const { createProgramFromSources, resizeCanvasToDisplaySize } = webglUtils;
+
 // Get A WebGL context
 const gl = c.getContext('webgl2');
 
@@ -13,9 +16,9 @@ const positionAttribLocation = gl.getAttribLocation(program, 'a_position');
 
 // look up uniform locations
 const resolutionUniformLocation = gl.getUniformLocation(program, 'u_resolution');
-const colorLocation = gl.getUniformLocation(program, "u_color");
-const translationLocation = gl.getUniformLocation(
-	program, "u_translation");
+const colorLocation =             gl.getUniformLocation(program, "u_color");
+const translationLocation =       gl.getUniformLocation(program, "u_translation");
+const rotationLocation =          gl.getUniformLocation(program, "u_rotation");
 
 //Create a buffer
 const positionBuffer = gl.createBuffer();
@@ -61,10 +64,10 @@ gl.useProgram(program);
 // pixels to clipspace in the shader
 gl.uniform2f(resolutionUniformLocation, gl.canvas.width, gl.canvas.height);
 
-const rectCoords = Array.from(document.getElementsByTagName('input'));
+const [rotation, ...translation] = Array.from(document.getElementsByTagName('input'));
 
-rectCoords[0].max = gl.canvas.width;
-rectCoords[1].max = gl.canvas.height;
+translation[0].max = gl.canvas.width;
+translation[1].max = gl.canvas.height;
 
 // Set Geometry.
 setGeometry(gl);
@@ -73,8 +76,12 @@ gl.uniform4f(colorLocation, Math.random(), Math.random(), Math.random(), 1);
 
 
 function drawScene(){
+	// Set the rotation.
+	const radAngle = degToRad(Number(rotation.value));
+	gl.uniform2fv(rotationLocation, [Math.cos(radAngle),Math.sin(radAngle)]);
+
 	// Set the translation.
-	gl.uniform2fv(translationLocation, rectCoords.map(e=>Number(e.value)));
+	gl.uniform2fv(translationLocation, translation.map(e=>Number(e.value)));
 
 	//Draw the F letter.
 	const primitiveType = gl.TRIANGLES,
@@ -84,4 +91,5 @@ function drawScene(){
 }
 drawScene()
 
-rectCoords.forEach(elem=>elem.addEventListener('mousemove',drawScene))
+rotation.addEventListener('mousemove', drawScene)
+translation.forEach(elem => elem.addEventListener('mousemove', drawScene))

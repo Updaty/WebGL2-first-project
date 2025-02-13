@@ -19,12 +19,28 @@ input {
 	position: absolute;
 	left: 500px;
 }
+input::after {
+	position: absolute;
+	left: 130px;
+	
+}
+#rotation::after {
+	content:'rotation'
+}
+#xTranslation::after {
+	content:'x\00a0translation'
+}
+#yTranslation::after {
+	content:'y\00a0translation'
+}
 	</style>
 </head>
 <body>
 <canvas id=c></canvas>
-<input id=xTranslation type=range value=0 min=0 style="top:50px">
-<input id=yTranslation type=range value=0 min=0 style="top:80px">
+<input id=rotation type=range value=180 min=0 max=359 style="top:50px">
+<input id=xTranslation type=range value=0 min=0 style="top:100px">
+<input id=yTranslation type=range value=0 min=0 style="top:130px">
+<script src="https://webgl2fundamentals.org/webgl/resources/webgl-utils.js"></script>
 <script src='./lib.js'></script>
 <script src='./script.js'></script>
 </body>
