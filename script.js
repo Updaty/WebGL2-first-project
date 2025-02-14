@@ -17,9 +17,7 @@ const positionAttribLocation = gl.getAttribLocation(program, 'a_position');
 // look up uniform locations
 const resolutionLocation =  gl.getUniformLocation(program, 'u_resolution');
 const colorLocation =       gl.getUniformLocation(program, "u_color");
-const translationLocation = gl.getUniformLocation(program, "u_translation");
-const rotationLocation =    gl.getUniformLocation(program, "u_rotation");
-const scaleLocation =    gl.getUniformLocation(program, "u_scale");
+const matrixLocation =      gl.getUniformLocation(program, "u_matrix");
 
 //Create a buffer
 const positionBuffer = gl.createBuffer();
@@ -82,15 +80,17 @@ function drawScene(e){
 		changedSlider.nextElementSibling.value = changedSlider.value;
 	}
 
-	// Set the rotation.
-	const radAngle = degToRad(Number(rotation.value)+90);
-	gl.uniform2fv(rotationLocation, [Math.cos(radAngle),Math.sin(radAngle)]);
-	
-	//Set the scale
-	gl.uniform2fv(scaleLocation, [scale[0].value, scale[1].value]);
-	
-	// Set the translation.
-	gl.uniform2fv(translationLocation, translation.map(e=>Number(e.value)));
+
+	//Compute the matrices
+	const
+	rotationMatrix = m3.rotation(Number(rotation.value)),
+	scaleMatrix = m3.scaling(Number(scale[0].value),Number(scale[1].value)),
+	translationMatrix = m3.translation(Number(translation[0].value),Number(translation[1].value));
+
+	//Multiply the matrices
+	const matrix = m3.multiply(m3.multiply(translationMatrix,rotationMatrix),scaleMatrix);
+	console.log(matrix);
+	gl.uniformMatrix3fv(matrixLocation, false, matrix);
 	
 	for (let i = 0; i < 6; i++) {
 		if(!isMonochrome.checked || i===0){
