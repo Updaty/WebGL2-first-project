@@ -15,10 +15,11 @@ const program = createProgramFromSources(gl, [vertexShaderSource, fragmentShader
 const positionAttribLocation = gl.getAttribLocation(program, 'a_position');
 
 // look up uniform locations
-const resolutionUniformLocation = gl.getUniformLocation(program, 'u_resolution');
-const colorLocation =             gl.getUniformLocation(program, "u_color");
-const translationLocation =       gl.getUniformLocation(program, "u_translation");
-const rotationLocation =          gl.getUniformLocation(program, "u_rotation");
+const resolutionLocation =  gl.getUniformLocation(program, 'u_resolution');
+const colorLocation =       gl.getUniformLocation(program, "u_color");
+const translationLocation = gl.getUniformLocation(program, "u_translation");
+const rotationLocation =    gl.getUniformLocation(program, "u_rotation");
+const scaleLocation =    gl.getUniformLocation(program, "u_scale");
 
 //Create a buffer
 const positionBuffer = gl.createBuffer();
@@ -62,34 +63,56 @@ gl.useProgram(program);
 
 // Pass in the canvas resolution so we can convert from
 // pixels to clipspace in the shader
-gl.uniform2f(resolutionUniformLocation, gl.canvas.width, gl.canvas.height);
+gl.uniform2f(resolutionLocation, gl.canvas.width, gl.canvas.height);
 
-const [rotation, ...translation] = Array.from(document.getElementsByTagName('input'));
+const rangeInputs = Array.from(document.querySelectorAll('input[type=range]'));
+
+const rotation = rangeInputs[0],
+	  scale = rangeInputs.slice(1,3),
+	  translation = rangeInputs.slice(3,5);
 
 translation[0].max = gl.canvas.width;
 translation[1].max = gl.canvas.height;
 
-// Set Geometry.
-setGeometry(gl);
+const isMonochrome = document.querySelector('input[type=checkbox]');
 
-gl.uniform4f(colorLocation, Math.random(), Math.random(), Math.random(), 1);
+function drawScene(e){
+	if(e && e.srcElement.type=='range') {
+		const changedSlider = e.srcElement;
+		changedSlider.nextElementSibling.value = changedSlider.value;
+	}
 
-
-function drawScene(){
 	// Set the rotation.
-	const radAngle = degToRad(Number(rotation.value)-90);
+	const radAngle = degToRad(Number(rotation.value)+90);
 	gl.uniform2fv(rotationLocation, [Math.cos(radAngle),Math.sin(radAngle)]);
-
+	
+	//Set the scale
+	gl.uniform2fv(scaleLocation, [scale[0].value, scale[1].value]);
+	
 	// Set the translation.
 	gl.uniform2fv(translationLocation, translation.map(e=>Number(e.value)));
-
-	//Draw the F letter.
-	const primitiveType = gl.TRIANGLES,
-	offset = 0,
-	count = 18;
-	gl.drawArrays(primitiveType, offset, count);
+	
+	for (let i = 0; i < 6; i++) {
+		if(!isMonochrome.checked || i===0){
+			gl.uniform4f(colorLocation, Math.random(), Math.random(), Math.random(), 1);
+		}
+	
+		setGeometry(gl, i);
+		
+		//Draw a distinct F letter.
+		{
+			const primitiveType = gl.TRIANGLES,
+			offset = 0,
+			count = 3;
+			gl.drawArrays(primitiveType, offset, count);
+		}
+	}
 }
-drawScene()
+drawScene();
 
-rotation.addEventListener('mousemove', drawScene)
-translation.forEach(elem => elem.addEventListener('mousemove', drawScene))
+rangeInputs.forEach(elem => {
+		elem.addEventListener('input', drawScene);
+		elem.addEventListener('change', drawScene);
+	});
+
+isMonochrome.addEventListener('click', drawScene);

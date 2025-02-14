@@ -7,12 +7,16 @@ in vec2 a_position;
 uniform vec2 u_resolution;
 uniform vec2 u_translation;
 uniform vec2 u_rotation;
+uniform vec2 u_scale;
 
 void main() {
+  //Scale the position
+  vec2 scaledPosition = a_position * u_scale;
+
   //Rotate the position
   vec2 rotatedPosition = vec2(
-     a_position.x * u_rotation.y + a_position.y * u_rotation.x,
-     a_position.y * u_rotation.y - a_position.x * u_rotation.x
+     scaledPosition.x * u_rotation.y + scaledPosition.y * u_rotation.x,
+     scaledPosition.y * u_rotation.y - scaledPosition.x * u_rotation.x
   );
   // Add in the translation
   vec2 position = rotatedPosition + u_translation;
@@ -58,32 +62,34 @@ function setRectangle(gl, x, y, width, height) {
   ]), gl.STATIC_DRAW);
 }
 
-function setGeometry(gl) {
+
+function setGeometry(gl, index) {
+  const dataset = [
+    // left column
+    [0, 0,
+    30, 0,
+    0, 150],
+    [0, 150,
+    30, 0,
+    30, 150],
+
+    // top rung
+    [30, 0,
+    100, 0,
+    30, 30],
+    [30, 30,
+    100, 0,
+    100, 30],
+
+    // middle rung
+    [30, 60,
+    67, 60,
+    30, 90],
+    [30, 90,
+    67, 60,
+    67, 90]]
   gl.bufferData(
       gl.ARRAY_BUFFER,
-      new Float32Array([
-          // left column
-          0, 0,
-          30, 0,
-          0, 150,
-          0, 150,
-          30, 0,
-          30, 150,
- 
-          // top rung
-          30, 0,
-          100, 0,
-          30, 30,
-          30, 30,
-          100, 0,
-          100, 30,
- 
-          // middle rung
-          30, 60,
-          67, 60,
-          30, 90,
-          30, 90,
-          67, 60,
-          67, 90]),
+      new Float32Array(dataset[index]),
       gl.STATIC_DRAW);
 }

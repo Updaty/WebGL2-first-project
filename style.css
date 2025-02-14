@@ -1,0 +1,33 @@
+@import url("https://webgl2fundamentals.org/webgl/resources/webgl-tutorials.css");
+body {
+  margin: 0;
+}
+#c {
+  width: 100vw;
+  height: 100vh;
+  display: block;
+}
+div {
+	appearance: auto;
+	position: absolute;
+	left: 500px;
+}
+div label {
+	position: absolute;
+	left: -90px;
+	white-space: nowrap;
+}
+
+div[title]:hover::after {
+    content: attr(title);
+    position: absolute;
+    font-size: .7em;
+    top: -130%;
+    left: 0;
+    width: 129px;
+    background: antiquewhite;
+    border: 1px rgb(246, 227, 202) solid;
+    border-radius: 2px;
+    padding: 3px;
+    z-index: 500;
+  }
