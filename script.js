@@ -94,7 +94,7 @@ function drawScene(e){
 	
 	for (let i = 0; i < 6; i++) {
 		if(!isMonochrome.checked || i===0){
-			gl.uniform4f(colorLocation, Math.random(), Math.random(), Math.random(), 1);
+			gl.uniform4f(colorLocation, randFloat(.5), randFloat(.5), randFloat(.5), 1);
 		}
 	
 		setGeometry(gl, i);

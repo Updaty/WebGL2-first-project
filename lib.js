@@ -44,6 +44,8 @@ void main() {
 }
 `);
 
+const randFloat = (min,max=1) => Math.random()*(max-min)+min
+
 const degToRad = degrees => degrees*.017453292519943295; // 1/180*Math.PI = 0.017453292519943295
 
 function setRectangle(gl, x, y, width, height) {

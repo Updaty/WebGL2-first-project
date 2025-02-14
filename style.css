@@ -22,7 +22,7 @@ div[title]:hover::after {
     content: attr(title);
     position: absolute;
     font-size: .7em;
-    top: -130%;
+    top: -80%;
     left: 0;
     background: antiquewhite;
     border: 1px rgb(246, 227, 202) solid;
@@ -33,5 +33,5 @@ div[title]:hover::after {
   }
 
 div[title]:has(> input[type="checkbox"]):hover::after {
-    top: -160%;
+    top: -100%;
 }
