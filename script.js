@@ -75,36 +75,45 @@ translation[1].max = gl.canvas.height;
 const isMonochrome = document.querySelector('input[type=checkbox]');
 
 function drawScene(e){
+	gl.clearColor(0, 0, 0, 0);
+	gl.clear(gl.COLOR_BUFFER_BIT);
+
+	// Tell it to use our program (pair of shaders)
+	gl.useProgram(program);
+
 	if(e && e.srcElement.type=='range') {
 		const changedSlider = e.srcElement;
 		changedSlider.nextElementSibling.value = changedSlider.value;
 	}
-
 
 	//Compute the matrices
 	const
 	rotationMatrix = m3.rotation(Number(rotation.value)),
 	scaleMatrix = m3.scaling(Number(scale[0].value),Number(scale[1].value)),
 	translationMatrix = m3.translation(Number(translation[0].value),Number(translation[1].value));
-
+	
 	//Multiply the matrices
-	const matrix = m3.multiply(m3.multiply(translationMatrix,rotationMatrix),scaleMatrix);
-	console.log(matrix);
-	gl.uniformMatrix3fv(matrixLocation, false, matrix);
-	
-	for (let i = 0; i < 6; i++) {
-		if(!isMonochrome.checked || i===0){
-			gl.uniform4f(colorLocation, randFloat(.5), randFloat(.5), randFloat(.5), 1);
-		}
-	
-		setGeometry(gl, i);
+	let matrix = m3.identity;
+
+	for (let j = 0; j < 5; j++) {
+		matrix = m3.multiply(m3.multiply(m3.multiply(matrix,translationMatrix),rotationMatrix),scaleMatrix);
 		
-		//Draw a distinct F letter.
-		{
-			const primitiveType = gl.TRIANGLES,
-			offset = 0,
-			count = 3;
-			gl.drawArrays(primitiveType, offset, count);
+		gl.uniformMatrix3fv(matrixLocation, false, matrix);
+
+		for (let i = 0; i < 6; i++) {
+			if(!isMonochrome.checked || i===0){
+				gl.uniform4f(colorLocation, randFloat(.5), randFloat(.5), randFloat(.5), 1);
+			}
+		
+			setGeometry(gl, i);
+			
+			//Draw a distinct triangle.
+			{
+				const primitiveType = gl.TRIANGLES,
+				offset = 0,
+				count = 3;
+				gl.drawArrays(primitiveType, offset, count);
+			}
 		}
 	}
 }

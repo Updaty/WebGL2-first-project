@@ -88,6 +88,11 @@ function setGeometry(gl, index) {
 
 
 const m3 = {
+  identity: [
+    1, 0, 0,
+    0, 1, 0,
+    0, 0, 1,
+  ],
   translation: (tx, ty) =>
     [
       1,  0,  0,
