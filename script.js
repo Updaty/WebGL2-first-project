@@ -67,7 +67,8 @@ const rangeInputs = Array.from(document.querySelectorAll('input[type=range]'));
 
 const rotation = rangeInputs[0],
 	  scale = rangeInputs.slice(1,3),
-	  translation = rangeInputs.slice(3,5);
+	  translation = rangeInputs.slice(3,5),
+	  clones = rangeInputs[5];
 
 translation[0].max = gl.canvas.width;
 translation[1].max = gl.canvas.height;
@@ -95,7 +96,7 @@ function drawScene(e){
 	//Multiply the matrices
 	let matrix = m3.identity;
 
-	for (let j = 0; j < 5; j++) {
+	for (let j = 0; j < Number(clones.value)+1; j++) {
 		matrix = m3.multiply(m3.multiply(m3.multiply(matrix,translationMatrix),rotationMatrix),scaleMatrix);
 		
 		gl.uniformMatrix3fv(matrixLocation, false, matrix);
