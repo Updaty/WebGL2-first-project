@@ -14,12 +14,14 @@ div {
 }
 div label {
 	position: absolute;
-	left: -90px;
+	text-align: end;
+	left:-150px;
+	width:150px;
 	white-space: nowrap;
 }
 
-div[title]:hover::after {
-    content: attr(title);
+input[alt]:hover::after {
+    content: attr(alt);
     position: absolute;
     font-size: .7em;
     top: -80%;
@@ -31,7 +33,3 @@ div[title]:hover::after {
     padding: 3px;
     z-index: 500;
   }
-
-div[title]:has(> input[type="checkbox"]):hover::after {
-    top: -100%;
-}

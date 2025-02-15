@@ -73,7 +73,7 @@ const rotation = rangeInputs[0],
 translation[0].max = gl.canvas.width;
 translation[1].max = gl.canvas.height;
 
-const isMonochrome = document.querySelector('input[type=checkbox]');
+const [isMonochrome, isClockwise] = document.querySelectorAll('input[type=checkbox]');
 
 function drawScene(e){
 	gl.clearColor(0, 0, 0, 0);
@@ -89,7 +89,7 @@ function drawScene(e){
 
 	//Compute the matrices
 	const
-	rotationMatrix = m3.rotation(Number(rotation.value)),
+	rotationMatrix = m3.rotation(isClockwise.checked?(360-Number(rotation.value)):Number(rotation.value)),
 	scaleMatrix = m3.scaling(Number(scale[0].value),Number(scale[1].value)),
 	translationMatrix = m3.translation(Number(translation[0].value),Number(translation[1].value));
 	
@@ -126,3 +126,4 @@ rangeInputs.forEach(elem => {
 	});
 
 isMonochrome.addEventListener('click', drawScene);
+isClockwise.addEventListener('click', drawScene);

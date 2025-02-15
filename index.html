@@ -8,39 +8,43 @@
 </head>
 <body>
 <canvas id=c></canvas>
-<div style="top:50px" title="The image rotates by this angle in degrees">
+<div style="top:50px">
 	<label>rotation</label>
-	<input id=rotation type=range value=0 min=0 max=359>
+	<input id=rotation type=range value=0 min=0 max=359 alt="The image rotates by this angle in degrees">
 	<output>0</output>
 </div>
-<div style="top:85px" title="The image expands horizontally by this many times">
+<div style="top:85px">
 	<label>x scale</label>
-	<input id=x_scale type=range value=1 step=.1 min=-5 max=5>
+	<input id=x_scale type=range value=1 step=.1 min=-5 max=5 alt="The image expands horizontally by this many times">
 	<output>1</output>
 </div>
-<div style="top:110px" title="The image expands vertically by this many times">
+<div style="top:110px">
 	<label>y scale</label>
-	<input id=y_scale type=range value=1 step=.1 min=-5 max=5>
+	<input id=y_scale type=range value=1 step=.1 min=-5 max=5 alt="The image expands vertically by this many times">
 	<output>1</output>
 </div>
-<div style="top:150px" title="The image moves left by this value">
+<div style="top:150px">
 	<label>x translation</label>
-	<input id=x_translation type=range value=25 min=0>
+	<input id=x_translation type=range value=35 min=0 alt="The image moves left by this value">
+	<output>35</output>
+</div>
+<div style="top:175px">
+	<label>y translation</label>
+	<input id=y_translation type=range value=25 min=0 alt="The image moves down by this value">
 	<output>25</output>
 </div>
-<div style="top:175px" title="The image moves down by this value">
-	<label>y translation</label>
-	<input id=y_translation type=range value=20 min=0>
-	<output>20</output>
-</div>
-<div style="top:210px" title="The image is drawn in one color or with each triangle in its own color">
+<div style="top:210px">
 	<label>monochrome</label>
-	<input id=monochrome type=checkbox>
+	<input id=monochrome type=checkbox alt="The image is drawn in one color or with each triangle in its own color">
 </div>
-<div style="top:245px" title="The image is cloned this many times">
+<div style="top:245px">
 	<label>clones amount</label>
-	<input id=clones type=range value=1 min=0 max=5>
+	<input id=clones type=range value=1 min=0 max=5 alt="The image is cloned this many times">
 	<output>1</output>
+</div>
+<div style="top:280px">
+	<label>clockwise rotating</label>
+	<input id=isClockwise type=checkbox alt="The image is rotated clockwise or counterclockwise">
 </div>
 <script src="https://webgl2fundamentals.org/webgl/resources/webgl-utils.js"></script>
 <script src="./lib.js"></script>
