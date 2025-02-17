@@ -8,13 +8,8 @@ uniform vec2 u_resolution;
 uniform mat3 u_matrix;
 
 void main() {
-  // Apply the matrix, and so all the transformations
-  vec2 position = (u_matrix * vec3(a_position, 1)).xy;
-
-  // Convert from position in pixels to -1->+1 (clip space)  
-	vec2 clipSpace = position / u_resolution * 2. - 1.;
- 
-	gl_Position = vec4(clipSpace*vec2(1,-1), 0, 1);
+// Multiply the position by the matrix
+	gl_Position = vec4((u_matrix * vec3(a_position, 1)).xy, 0, 1);
 }`);
 
 const fragmentShaderSource = (`#version 300 es
@@ -117,7 +112,13 @@ const m3 = {
       0, sy, 0,
       0, 0, 1,
     ],
-
+  projection: (width, height) =>
+    // Note: This matrix flips the Y axis so that 0 is at the top.
+    [
+      2 / width, 0, 0,
+      0, -2 / height, 0,
+      -1, 1, 1,
+    ],
   multiply: (a, b) => {
     const 
     a00 = a[0],
@@ -150,11 +151,12 @@ const m3 = {
       b20 * a02 + b21 * a12 + b22 * a22,
     ];
   },
-  multiplyInOrder: (first_matrix, ...matrices) => {
-    let matrix = first_matrix;
-    for(let nextMatrix of matrices){
-      matrix = m3.multiply(matrix, nextMatrix);
-    }
-    return matrix;
-  }
+  translate: (m, tx, ty) =>
+    m3.multiply(m, m3.translation(tx, ty)),
+ 
+  rotate: (m, angleInRadians) =>
+    m3.multiply(m, m3.rotation(angleInRadians)),
+ 
+  scale: (m, sx, sy) =>
+    m3.multiply(m, m3.scaling(sx, sy)),
 };

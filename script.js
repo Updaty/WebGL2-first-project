@@ -56,12 +56,7 @@ gl.clear(gl.COLOR_BUFFER_BIT);
 // Tell it to use our program (pair of shaders)
 gl.useProgram(program);
 
-// Bind the attribute/buffer set we want.
-//    gl.bindVertexArray(vao);
 
-// Pass in the canvas resolution so we can convert from
-// pixels to clipspace in the shader
-gl.uniform2f(resolutionLocation, gl.canvas.width, gl.canvas.height);
 
 const rangeInputs = Array.from(document.querySelectorAll('input[type=range]'));
 
@@ -75,8 +70,6 @@ translation[1].max = gl.canvas.height;
 
 const [isMonochrome, isClockwise] = document.querySelectorAll('input[type=checkbox]');
 
-// make a matrix that will move the origin of the 'F' to its center.
-const moveOriginMatrix = m3.translation(-50, -75);
 
 function drawScene(e){
 	gl.clearColor(0, 0, 0, 0);
@@ -89,36 +82,29 @@ function drawScene(e){
 		const changedSlider = e.srcElement;
 		changedSlider.nextElementSibling.value = changedSlider.value;
 	}
-
-	//Compute the matrices
-	const
-	rotationMatrix = m3.rotation(isClockwise.checked?(360-Number(rotation.value)):Number(rotation.value)),
-	scaleMatrix = m3.scaling(Number(scale[0].value),Number(scale[1].value)),
-	translationMatrix = m3.translation(Number(translation[0].value),Number(translation[1].value));
 	
 
-	//Set the initial matrix
-	let matrix = m3.identity;
+	//Compute the matrices
+	let matrix = m3.projection(gl.canvas.clientWidth,gl.canvas.clientHeight);
+	matrix = m3.translate(matrix, Number(translation[0].value),Number(translation[1].value));
+	matrix = m3.rotate(matrix, isClockwise.checked ? (360-Number(rotation.value)) : Number(rotation.value));
+	matrix = m3.scale(matrix, Number(scale[0].value),Number(scale[1].value));
+	
+	gl.uniformMatrix3fv(matrixLocation, false, matrix);
 
-	for (let j = 0; j < Number(clones.value)+1; j++) {
-		matrix = m3.multiplyInOrder(matrix,translationMatrix,rotationMatrix,scaleMatrix,moveOriginMatrix);
+	for (let i = 0; i < 6; i++) {
+		if(!isMonochrome.checked || i===0){
+			gl.uniform4f(colorLocation, randFloat(.5), randFloat(.5), randFloat(.5), 1);
+		}
+	
+		setGeometry(gl, i);
 		
-		gl.uniformMatrix3fv(matrixLocation, false, matrix);
-
-		for (let i = 0; i < 6; i++) {
-			if(!isMonochrome.checked || i===0){
-				gl.uniform4f(colorLocation, randFloat(.5), randFloat(.5), randFloat(.5), 1);
-			}
-		
-			setGeometry(gl, i);
-			
-			//Draw a distinct triangle.
-			{
-				const primitiveType = gl.TRIANGLES,
-				offset = 0,
-				count = 3;
-				gl.drawArrays(primitiveType, offset, count);
-			}
+		//Draw a distinct triangle.
+		{
+			const primitiveType = gl.TRIANGLES,
+			offset = 0,
+			count = 3;
+			gl.drawArrays(primitiveType, offset, count);
 		}
 	}
 }
