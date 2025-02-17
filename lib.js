@@ -150,4 +150,11 @@ const m3 = {
       b20 * a02 + b21 * a12 + b22 * a22,
     ];
   },
+  multiplyInOrder: (first_matrix, ...matrices) => {
+    let matrix = first_matrix;
+    for(let nextMatrix of matrices){
+      matrix = m3.multiply(matrix, nextMatrix);
+    }
+    return matrix;
+  }
 };

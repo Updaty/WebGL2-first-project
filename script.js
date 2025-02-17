@@ -75,6 +75,9 @@ translation[1].max = gl.canvas.height;
 
 const [isMonochrome, isClockwise] = document.querySelectorAll('input[type=checkbox]');
 
+// make a matrix that will move the origin of the 'F' to its center.
+const moveOriginMatrix = m3.translation(-50, -75);
+
 function drawScene(e){
 	gl.clearColor(0, 0, 0, 0);
 	gl.clear(gl.COLOR_BUFFER_BIT);
@@ -93,11 +96,12 @@ function drawScene(e){
 	scaleMatrix = m3.scaling(Number(scale[0].value),Number(scale[1].value)),
 	translationMatrix = m3.translation(Number(translation[0].value),Number(translation[1].value));
 	
-	//Multiply the matrices
+
+	//Set the initial matrix
 	let matrix = m3.identity;
 
 	for (let j = 0; j < Number(clones.value)+1; j++) {
-		matrix = m3.multiply(m3.multiply(m3.multiply(matrix,translationMatrix),rotationMatrix),scaleMatrix);
+		matrix = m3.multiplyInOrder(matrix,translationMatrix,rotationMatrix,scaleMatrix,moveOriginMatrix);
 		
 		gl.uniformMatrix3fv(matrixLocation, false, matrix);
 
