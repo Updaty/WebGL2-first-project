@@ -15,7 +15,6 @@ const program = createProgramFromSources(gl, [vertexShaderSource, fragmentShader
 const positionAttribLocation = gl.getAttribLocation(program, 'a_position');
 
 // look up uniform locations
-const resolutionLocation =  gl.getUniformLocation(program, 'u_resolution');
 const colorLocation =       gl.getUniformLocation(program, "u_color");
 const matrixLocation =      gl.getUniformLocation(program, "u_matrix");
 
@@ -62,8 +61,7 @@ const rangeInputs = Array.from(document.querySelectorAll('input[type=range]'));
 
 const rotation = rangeInputs[0],
 	  scale = rangeInputs.slice(1,3),
-	  translation = rangeInputs.slice(3,5),
-	  clones = rangeInputs[5];
+	  translation = rangeInputs.slice(3,5);
 
 translation[0].max = gl.canvas.width;
 translation[1].max = gl.canvas.height;
@@ -78,8 +76,8 @@ function drawScene(e){
 	// Tell it to use our program (pair of shaders)
 	gl.useProgram(program);
 
-	if(e && e.srcElement.type=='range') {
-		const changedSlider = e.srcElement;
+	if(e && e.target.type=='range') {
+		const changedSlider = e.target;
 		changedSlider.nextElementSibling.value = changedSlider.value;
 	}
 	
@@ -113,6 +111,28 @@ drawScene();
 rangeInputs.forEach(elem => {
 		elem.addEventListener('input', drawScene);
 		elem.addEventListener('change', drawScene);
+		
+		elem.addEventListener('mousewheel', e => {
+			console.log(e)
+			const input = e.target;
+			const
+			 value = Number(input.value),
+			 max = Number(input.max),
+			 min = Number(input.min);
+
+			const newValue = (value + Number(input.step||1)*(e.deltaY>0?1:-1));
+
+		input.value = newValue;
+		
+	    if(/^([xyz]_)?rotation$/.test(input.id)){
+			if(newValue<min)
+				input.value = max;
+			else if(newValue>max)
+				input.value = min;
+		}
+
+		drawScene({target: input})
+		})
 	});
 
 isMonochrome.addEventListener('click', drawScene);

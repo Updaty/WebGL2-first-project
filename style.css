@@ -10,7 +10,7 @@ body {
 div {
 	appearance: auto;
 	position: absolute;
-	left: 500px;
+	left: 60%;
 }
 div label {
 	position: absolute;
@@ -25,7 +25,7 @@ input[alt]:hover::after {
     position: absolute;
     font-size: .7em;
     top: -80%;
-    left: 0;
+    left: -10px;
     background: antiquewhite;
     border: 1px rgb(246, 227, 202) solid;
     border-radius: 2px;
