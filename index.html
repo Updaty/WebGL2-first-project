@@ -7,7 +7,7 @@
 	<link rel=stylesheet href="./style.css">
 </head>
 <body>
-<canvas id=c></canvas>
+<canvas id=cvs></canvas>
 <div style="top:50px">
 	<label>x rotation</label>
 	<input id=x_rotation type=range value=350 min=0 max=359 alt="The image rotates by this angle on x axis">
@@ -15,13 +15,13 @@
 </div>
 <div style="top:70px">
 	<label>y rotation</label>
-	<input id=y_rotation type=range value=340 min=0 max=359 alt="The image rotates by this angle on y axis">
-	<output>340</output>
+	<input id=y_rotation type=range value=200 min=0 max=359 alt="The image rotates by this angle on y axis">
+	<output>200</output>
 </div>
 <div style="top:90px">
 	<label>z rotation</label>
-	<input id=z_rotation type=range value=0 min=0 max=359 alt="The image rotates by this angle on z axis">
-	<output>0</output>
+	<input id=z_rotation type=range value=180 min=0 max=359 alt="The image rotates by this angle on z axis">
+	<output>180</output>
 </div>
 <div style="top:120px">
 	<label>x scale</label>
@@ -40,18 +40,23 @@
 </div>
 <div style="top:190px">
 	<label>x translation</label>
-	<input id=x_translation type=range value=100 min=0 alt="The image moves left by this value">
-	<output>100</output>
+	<input id=x_translation type=range value=0 min=-200 max=200 alt="The image moves left by this value">
+	<output>0</output>
 </div>
 <div style="top:210px">
 	<label>y translation</label>
-	<input id=y_translation type=range  value=125 min=0 max=125 alt="The image moves down by this value">
-	<output>125</output>
+	<input id=y_translation type=range  value=0 min=-200 max=200 alt="The image moves down by this value">
+	<output>0</output>
 </div>
 <div style="top:230px">
 	<label>z translation</label>
-	<input id=z_translation type=range  value=0 min=0 max=400 alt="The image moves in depth by this value">
-	<output>0</output>
+	<input id=z_translation type=range  value=-360 min=-1000 max=1 alt="The image moves in depth by this value">
+	<output>-360</output>
+</div>
+<div style="top:260px">
+	<label>FOV</label>
+	<input id=fov type=range  value=60 min=0 max=179 alt="The field of view of the camera">
+	<output>60</output>
 </div>
 <script src="https://webgl2fundamentals.org/webgl/resources/webgl-utils.js"></script>
 <script src="./lib.js"></script>

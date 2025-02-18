@@ -11,14 +11,16 @@ in vec4 a_color;
 // A matrix to transform the positions by
 uniform mat4 u_matrix;
  
+uniform float u_fudgeFactor;
+
 // a varying the color to the fragment shader
 out vec4 v_color;
  
 // all shaders have a main function
 void main() {
-  // Multiply the position by the matrix.
+  // Divide x and y by z
   gl_Position = u_matrix * a_position;
- 
+
   // Pass the color to the fragment shader.
   v_color = a_color;
 }`);
@@ -394,7 +396,18 @@ const m4 = {
       (bottom + top) / (bottom - top),
       (near + far) / (near - far),
       1,
-    ],
+    ],  
+  perspective: (fieldOfView, aspect, near, far) => {
+    const f = Math.tan(Math.PI * 0.5 - 0.5 * degToRad(fieldOfView));
+    const rangeInv = 1.0 / (near - far);
+  
+    return [
+      f / aspect, 0, 0, 0,
+      0, f, 0, 0,
+      0, 0, (near + far) * rangeInv, -1,
+      0, 0, near * far * rangeInv * 2, 0
+    ];
+  },
   multiply: function(a, b) {
     const
     b00 = b[0 ],
