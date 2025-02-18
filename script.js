@@ -13,6 +13,7 @@ const program = createProgramFromSources(gl, [vertexShaderSource, fragmentShader
 
 // look up where the vertex data needs to go.
 const positionAttribLocation = gl.getAttribLocation(program, 'a_position');
+const colorAttributeLocation = gl.getAttribLocation(program, 'a_color');
 
 // look up uniform locations
 const colorLocation =       gl.getUniformLocation(program, "u_color");
@@ -32,78 +33,102 @@ gl.enableVertexAttribArray(positionAttribLocation);
 
 gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
 
+setGeometry(gl);
+
 // Tell the attribute how to get data out of positionBuffer (ARRAY_BUFFER)
 {
-		const size = 2,           // 2 components per iteration
-				type = gl.FLOAT,   // the data is 32bit floats
-				normalize = false,// don't normalize the data
-				stride = 0,		  // 0 = move forward size * sizeof(type) each iteration to get the next position
-				offset = 0;		  // start at the beginning of the buffer
-		gl.vertexAttribPointer(
-				positionAttribLocation, size, type, normalize, stride, offset)
+	const
+	size = 3,           // 3 components per iteration
+	type = gl.FLOAT,   // the data is 32bit floats
+	normalize = false,// don't normalize the data
+	stride = 0,		  // 0 = move forward size * sizeof(type) each iteration to get the next position
+	offset = 0;		  // start at the beginning of the buffer
+	gl.vertexAttribPointer(
+		positionAttribLocation, size, type, normalize, stride, offset)
 }
+				
+// create the color buffer, make it the current ARRAY_BUFFER
+// and copy in the color values
+const colorBuffer = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+setColors(gl);
 
-resizeCanvasToDisplaySize(gl.canvas);
-
-// Tell WebGL how to convert from clip space to pixels
-gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
-
-// Clear the canvas
-gl.clearColor(0, 0, 0, 0);
-gl.clear(gl.COLOR_BUFFER_BIT);
-
-// Tell it to use our program (pair of shaders)
-gl.useProgram(program);
+// Turn on the attribute
+gl.enableVertexAttribArray(colorAttributeLocation);
+ 
+// Tell the attribute how to get data out of colorBuffer (ARRAY_BUFFER)
+{
+	const
+	size = 3,          // 3 components per iteration
+	type = gl.UNSIGNED_BYTE,   // the data is 8bit unsigned bytes
+	normalize = true,  // convert from 0-255 to 0.0-1.0
+	stride = 0,        // 0 = move forward size * sizeof(type) each iteration to get the next color
+	offset = 0;        // start at the beginning of the buffer
+	gl.vertexAttribPointer(
+		colorAttributeLocation, size, type, normalize, stride, offset);
+}
 
 
 
 const rangeInputs = Array.from(document.querySelectorAll('input[type=range]'));
 
-const rotation = rangeInputs[0],
-	  scale = rangeInputs.slice(1,3),
-	  translation = rangeInputs.slice(3,5);
+const rotation = rangeInputs.slice(0,3),
+	  scale = rangeInputs.slice(3,6),
+	  translation = rangeInputs.slice(6,9);
 
 translation[0].max = gl.canvas.width;
 translation[1].max = gl.canvas.height;
 
-const [isMonochrome, isClockwise] = document.querySelectorAll('input[type=checkbox]');
-
 
 function drawScene(e){
-	gl.clearColor(0, 0, 0, 0);
-	gl.clear(gl.COLOR_BUFFER_BIT);
+	gl.enable(gl.CULL_FACE);
+	gl.enable(gl.DEPTH_TEST);
+    webglUtils.resizeCanvasToDisplaySize(gl.canvas);
 
-	// Tell it to use our program (pair of shaders)
-	gl.useProgram(program);
+    // Tell WebGL how to convert from clip space to pixels
+    gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+
+    // Clear the canvas
+    gl.clearColor(0, 0, 0, 0);
+    gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+    // Tell it to use our program (pair of shaders)
+    gl.useProgram(program);
+
+    // Bind the attribute/buffer set we want.
+    gl.bindVertexArray(vao);
 
 	if(e && e.target.type=='range') {
 		const changedSlider = e.target;
 		changedSlider.nextElementSibling.value = changedSlider.value;
 	}
+	let matrix;
+	//Compute the matrix
+	{
+		const 
+		left = 0,
+		right = gl.canvas.clientWidth,
+		bottom = gl.canvas.clientHeight,
+		top = 0,
+		near = 200,
+		far = -200;
+		matrix = m4.orthographic(left, right, bottom, top, near, far);
+	}
+	matrix = m4.translate(matrix, Number(translation[0].value), Number(translation[1].value), Number(translation[2].value));
+	matrix = m4.xRotate(matrix, 360-Number(rotation[0].value));
+	matrix = m4.yRotate(matrix, 360-Number(rotation[1].value));
+	matrix = m4.zRotate(matrix, 360-Number(rotation[2].value));
+	matrix = m4.scale(matrix, Number(scale[0].value),Number(scale[1].value),Number(scale[2].value));
 	
-
-	//Compute the matrices
-	let matrix = m3.projection(gl.canvas.clientWidth,gl.canvas.clientHeight);
-	matrix = m3.translate(matrix, Number(translation[0].value),Number(translation[1].value));
-	matrix = m3.rotate(matrix, isClockwise.checked ? (360-Number(rotation.value)) : Number(rotation.value));
-	matrix = m3.scale(matrix, Number(scale[0].value),Number(scale[1].value));
-	
-	gl.uniformMatrix3fv(matrixLocation, false, matrix);
-
-	for (let i = 0; i < 6; i++) {
-		if(!isMonochrome.checked || i===0){
-			gl.uniform4f(colorLocation, randFloat(.5), randFloat(.5), randFloat(.5), 1);
-		}
-	
-		setGeometry(gl, i);
+	gl.uniformMatrix4fv(matrixLocation, false, matrix);
 		
-		//Draw a distinct triangle.
-		{
-			const primitiveType = gl.TRIANGLES,
-			offset = 0,
-			count = 3;
-			gl.drawArrays(primitiveType, offset, count);
-		}
+	//Draw a distinct triangle.
+	{
+		const
+		primitiveType = gl.TRIANGLES,
+		offset = 0,
+		count = 16 * 6;
+		gl.drawArrays(primitiveType, offset, count);
 	}
 }
 drawScene();
@@ -124,7 +149,7 @@ rangeInputs.forEach(elem => {
 
 		input.value = newValue;
 		
-	    if(/^([xyz]_)?rotation$/.test(input.id)){
+	    if(/^[xyz]_rotation$/.test(input.id)){
 			if(newValue<min)
 				input.value = max;
 			else if(newValue>max)
@@ -134,6 +159,3 @@ rangeInputs.forEach(elem => {
 		drawScene({target: input})
 		})
 	});
-
-isMonochrome.addEventListener('click', drawScene);
-isClockwise.addEventListener('click', drawScene);

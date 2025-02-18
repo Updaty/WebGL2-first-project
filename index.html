@@ -9,37 +9,49 @@
 <body>
 <canvas id=c></canvas>
 <div style="top:50px">
-	<label>rotation</label>
-	<input id=rotation type=range value=0 min=0 max=359 alt="The image rotates by this angle in degrees">
+	<label>x rotation</label>
+	<input id=x_rotation type=range value=350 min=0 max=359 alt="The image rotates by this angle on x axis">
+	<output>350</output>
+</div>
+<div style="top:70px">
+	<label>y rotation</label>
+	<input id=y_rotation type=range value=340 min=0 max=359 alt="The image rotates by this angle on y axis">
+	<output>340</output>
+</div>
+<div style="top:90px">
+	<label>z rotation</label>
+	<input id=z_rotation type=range value=0 min=0 max=359 alt="The image rotates by this angle on z axis">
 	<output>0</output>
 </div>
-<div style="top:85px">
+<div style="top:120px">
 	<label>x scale</label>
 	<input id=x_scale type=range value=1 step=.1 min=-5 max=5 alt="The image expands horizontally by this many times">
 	<output>1</output>
 </div>
-<div style="top:110px">
+<div style="top:140px">
 	<label>y scale</label>
 	<input id=y_scale type=range value=1 step=.1 min=-5 max=5 alt="The image expands vertically by this many times">
 	<output>1</output>
 </div>
-<div style="top:150px">
+<div style="top:160px">
+	<label>z scale</label>
+	<input id=z_scale type=range value=1 step=.1 min=-5 max=5 alt="The image expands in depth by this many times">
+	<output>1</output>
+</div>
+<div style="top:190px">
 	<label>x translation</label>
 	<input id=x_translation type=range value=100 min=0 alt="The image moves left by this value">
 	<output>100</output>
 </div>
-<div style="top:175px">
+<div style="top:210px">
 	<label>y translation</label>
-	<input id=y_translation type=range  value="125" min=0 max="125" alt="The image moves down by this value">
+	<input id=y_translation type=range  value=125 min=0 max=125 alt="The image moves down by this value">
 	<output>125</output>
 </div>
-<div style="top:210px">
-	<label>monochrome</label>
-	<input id=monochrome type=checkbox alt="The image is drawn in one color or with each triangle in its own color">
-</div>
-<div style="top:245px">
-	<label>clockwise rotating</label>
-	<input id=isClockwise type=checkbox alt="The image is rotated clockwise or counterclockwise">
+<div style="top:230px">
+	<label>z translation</label>
+	<input id=z_translation type=range  value=0 min=0 max=400 alt="The image moves in depth by this value">
+	<output>0</output>
 </div>
 <script src="https://webgl2fundamentals.org/webgl/resources/webgl-utils.js"></script>
 <script src="./lib.js"></script>
