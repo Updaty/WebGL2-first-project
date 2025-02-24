@@ -32,6 +32,8 @@ precision highp float;
  
 // the varied color passed from the vertex shader
 in vec4 v_color;
+
+uniform sampler2D u_texture;
  
 // we need to declare an output for the fragment shader
 out vec4 outColor;
@@ -43,6 +45,26 @@ void main() {
 const randFloat = (min,max=1) => Math.random()*(max-min)+min
 
 const degToRad = degrees => degrees*.017453292519943295; // 1/180*Math.PI = 0.017453292519943295
+
+function addToSlider(slider, toAdd){
+  const
+    value = Number(slider.value),
+    max = Number(slider.max),
+    min = Number(slider.min);
+
+  const newValue = value + toAdd;
+
+  slider.value = newValue;
+  
+  if(slider.attributes?.unit?.value=='deg' && slider.max=='359'){
+    if(newValue<min)
+      slider.value = max;
+    else if(newValue>max)
+      slider.value = min;
+  }
+
+  drawScene({target: slider});
+}
 
 function setRectangle(gl, x, y, width, height) {
   const x1 = x,
@@ -198,6 +220,140 @@ function setGeometry(gl) {
       gl.STATIC_DRAW);
 }
 
+function setTexcoords(gl){
+  gl.bufferData(
+    gl.ARRAY_BUFFER,
+    new Float32Array([
+      // left column front
+      0, 0,
+      0, 1,
+      1, 0,
+      0, 1,
+      1, 1,
+      1, 0,
+
+      // top rung front
+      0, 0,
+      0, 1,
+      1, 0,
+      0, 1,
+      1, 1,
+      1, 0,
+      // middle rung front
+      0, 0,
+      0, 1,
+      1, 0,
+      0, 1,
+      1, 1,
+      1, 0,
+
+      // left column back
+      0, 0,
+      1, 0,
+      0, 1,
+      0, 1,
+      1, 0,
+      1, 1,
+
+      // top rung back
+      0, 0,
+      1, 0,
+      0, 1,
+      0, 1,
+      1, 0,
+      1, 1,
+
+      // middle rung back
+      0, 0,
+      1, 0,
+      0, 1,
+      0, 1,
+      1, 0,
+      1, 1,
+
+      // top
+      0, 0,
+      1, 0,
+      1, 1,
+      0, 0,
+      1, 1,
+      0, 1,
+
+      // top rung right
+      0, 0,
+      1, 0,
+      1, 1,
+      0, 0,
+      1, 1,
+      0, 1,
+
+      // under top rung
+      0, 0,
+      0, 1,
+      1, 1,
+      0, 0,
+      1, 1,
+      1, 0,
+
+      // between top rung and middle
+      0, 0,
+      1, 1,
+      0, 1,
+      0, 0,
+      1, 0,
+      1, 1,
+
+      // top of middle rung
+      0, 0,
+      1, 1,
+      0, 1,
+      0, 0,
+      1, 0,
+      1, 1,
+
+      // right of middle rung
+      0, 0,
+      1, 1,
+      0, 1,
+      0, 0,
+      1, 0,
+      1, 1,
+
+      // bottom of middle rung.
+      0, 0,
+      0, 1,
+      1, 1,
+      0, 0,
+      1, 1,
+      1, 0,
+
+      // right of bottom
+      0, 0,
+      1, 1,
+      0, 1,
+      0, 0,
+      1, 0,
+      1, 1,
+
+      // bottom
+      0, 0,
+      0, 1,
+      1, 1,
+      0, 0,
+      1, 1,
+      1, 0,
+
+      // left side
+      0, 0,
+      0, 1,
+      1, 1,
+      0, 0,
+      1, 1,
+      1, 0,
+     ]),
+     gl.STATIC_DRAW);
+};
+
 // Fill the current ARRAY_BUFFER buffer with colors for the 'F'.
 function setColors(gl) {
   gl.bufferData(
@@ -334,6 +490,28 @@ function setColors(gl) {
       gl.STATIC_DRAW);
 }
 
+const v3 = {
+  cross: (a, b) => 
+    [
+      a[1] * b[2] - a[2] * b[1],
+      a[2] * b[0] - a[0] * b[2],
+      a[0] * b[1] - a[1] * b[0],
+    ],
+  
+  subtract: (a, b) => 
+    [a[0] - b[0], a[1] - b[1], a[2] - b[2]],
+  normalize: v => {
+    const length = Math.sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+    // make sure we don't divide by 0.
+    if (length > 0.00001) {
+      return [v[0] / length, v[1] / length, v[2] / length];
+    } else {
+      return [0, 0, 0];
+    }
+  }
+}
+
+
 const m4 = {
   translation: (tx, ty, tz) =>
     [
@@ -409,39 +587,18 @@ const m4 = {
     ];
   },
   multiply: function(a, b) {
-    const
-    b00 = b[0 ],
-    b01 = b[1 ],
-    b02 = b[2 ],
-    b03 = b[3 ],
-    b10 = b[4 ],
-    b11 = b[5 ],
-    b12 = b[6 ],
-    b13 = b[7 ],
-    b20 = b[8 ],
-    b21 = b[9 ],
-    b22 = b[10],
-    b23 = b[11],
-    b30 = b[12],
-    b31 = b[13],
-    b32 = b[14],
-    b33 = b[15],
-    a00 = a[0 ],
-    a01 = a[1 ],
-    a02 = a[2 ],
-    a03 = a[3 ],
-    a10 = a[4 ],
-    a11 = a[5 ],
-    a12 = a[6 ],
-    a13 = a[7 ],
-    a20 = a[8 ],
-    a21 = a[9 ],
-    a22 = a[10],
-    a23 = a[11],
-    a30 = a[12],
-    a31 = a[13],
-    a32 = a[14],
-    a33 = a[15];
+    const [
+      b00, b01, b02, b03,
+      b10, b11, b12, b13,
+      b20, b21, b22, b23,
+      b30, b31, b32, b33,
+    ] = b;
+    const [
+      a00, a01, a02, a03,
+      a10, a11, a12, a13,
+      a20, a21, a22, a23,
+      a30, a31, a32, a33
+    ] = a;
   
     return [
       b00 * a00 + b01 * a10 + b02 * a20 + b03 * a30,
@@ -462,18 +619,109 @@ const m4 = {
       b30 * a03 + b31 * a13 + b32 * a23 + b33 * a33,
     ];
   },
+  inverse: (m) => {
+  const [
+    m00, m01, m02, m03,
+    m10, m11, m12, m13, 
+    m20, m21, m22, m23,
+    m30, m31, m32, m33,
+  ] = m;
+  const
+    tmp_0  = m22 * m33,
+    tmp_1  = m32 * m23,
+    tmp_2  = m12 * m33,
+    tmp_3  = m32 * m13,
+    tmp_4  = m12 * m23,
+    tmp_5  = m22 * m13,
+    tmp_6  = m02 * m33,
+    tmp_7  = m32 * m03,
+    tmp_8  = m02 * m23,
+    tmp_9  = m22 * m03,
+    tmp_10 = m02 * m13,
+    tmp_11 = m12 * m03,
+    tmp_12 = m20 * m31,
+    tmp_13 = m30 * m21,
+    tmp_14 = m10 * m31,
+    tmp_15 = m30 * m11,
+    tmp_16 = m10 * m21,
+    tmp_17 = m20 * m11,
+    tmp_18 = m00 * m31,
+    tmp_19 = m30 * m01,
+    tmp_20 = m00 * m21,
+    tmp_21 = m20 * m01,
+    tmp_22 = m00 * m11,
+    tmp_23 = m10 * m01;
+
+    const
+    t0 = (tmp_0 * m11 + tmp_3 * m21 + tmp_4 * m31) -
+         (tmp_1 * m11 + tmp_2 * m21 + tmp_5 * m31),
+    t1 = (tmp_1 * m01 + tmp_6 * m21 + tmp_9 * m31) -
+         (tmp_0 * m01 + tmp_7 * m21 + tmp_8 * m31),
+    t2 = (tmp_2 * m01 + tmp_7 * m11 + tmp_10 * m31) -
+         (tmp_3 * m01 + tmp_6 * m11 + tmp_11 * m31),
+    t3 = (tmp_5 * m01 + tmp_8 * m11 + tmp_11 * m21) -
+             (tmp_4 * m01 + tmp_9 * m11 + tmp_10 * m21);
+
+    const d = 1. / (m00 * t0 + m10 * t1 + m20 * t2 + m30 * t3);
+
+    return [
+      d * t0,
+      d * t1,
+      d * t2,
+      d * t3,
+      d * ((tmp_1 * m10 + tmp_2 * m20 + tmp_5 * m30) -
+           (tmp_0 * m10 + tmp_3 * m20 + tmp_4 * m30)),
+      d * ((tmp_0 * m00 + tmp_7 * m20 + tmp_8 * m30) -
+           (tmp_1 * m00 + tmp_6 * m20 + tmp_9 * m30)),
+      d * ((tmp_3 * m00 + tmp_6 * m10 + tmp_11 * m30) -
+           (tmp_2 * m00 + tmp_7 * m10 + tmp_10 * m30)),
+      d * ((tmp_4 * m00 + tmp_9 * m10 + tmp_10 * m20) -
+           (tmp_5 * m00 + tmp_8 * m10 + tmp_11 * m20)),
+      d * ((tmp_12 * m13 + tmp_15 * m23 + tmp_16 * m33) -
+           (tmp_13 * m13 + tmp_14 * m23 + tmp_17 * m33)),
+      d * ((tmp_13 * m03 + tmp_18 * m23 + tmp_21 * m33) -
+           (tmp_12 * m03 + tmp_19 * m23 + tmp_20 * m33)),
+      d * ((tmp_14 * m03 + tmp_19 * m13 + tmp_22 * m33) -
+           (tmp_15 * m03 + tmp_18 * m13 + tmp_23 * m33)),
+      d * ((tmp_17 * m03 + tmp_20 * m13 + tmp_23 * m23) -
+           (tmp_16 * m03 + tmp_21 * m13 + tmp_22 * m23)),
+      d * ((tmp_14 * m22 + tmp_17 * m32 + tmp_13 * m12) -
+           (tmp_16 * m32 + tmp_12 * m12 + tmp_15 * m22)),
+      d * ((tmp_20 * m32 + tmp_12 * m02 + tmp_19 * m22) -
+           (tmp_18 * m22 + tmp_21 * m32 + tmp_13 * m02)),
+      d * ((tmp_18 * m12 + tmp_23 * m32 + tmp_15 * m02) -
+           (tmp_22 * m32 + tmp_14 * m02 + tmp_19 * m12)),
+      d * ((tmp_22 * m22 + tmp_16 * m02 + tmp_21 * m12) -
+           (tmp_20 * m12 + tmp_23 * m22 + tmp_17 * m02)),
+    ];
+  },
   translate: (m, tx, ty, tz) =>
     m4.multiply(m, m4.translation(tx, ty, tz)),
  
-  xRotate: (m, angleInRadians) =>
-    m4.multiply(m, m4.xRotation(angleInRadians)),
+  xRotate: (m, angle) =>
+    m4.multiply(m, m4.xRotation(angle)),
 
   yRotate: (m, angleInRadians) =>
     m4.multiply(m, m4.yRotation(angleInRadians)),
 
-  zRotate: (m, angleInRadians) =>
-    m4.multiply(m, m4.zRotation(angleInRadians)),
+  zRotate: (m, angle) =>
+    m4.multiply(m, m4.zRotation(angle)),
  
   scale: (m, sx, sy, sz) =>
     m4.multiply(m, m4.scaling(sx, sy, sz)),
+  lookAt: (cameraPosition, target, up) => {
+    const zAxis = v3.normalize(v3.subtract(cameraPosition, target));
+    const xAxis = v3.normalize(v3.cross(up, zAxis));
+    const yAxis = v3.normalize(v3.cross(zAxis, xAxis));
+
+    return [
+      xAxis[0], xAxis[1], xAxis[2], 0,
+      yAxis[0], yAxis[1], yAxis[2], 0,
+      zAxis[0], zAxis[1], zAxis[2], 0,
+      cameraPosition[0],
+      cameraPosition[1],
+      cameraPosition[2],
+      1,
+    ];
+  }
 };

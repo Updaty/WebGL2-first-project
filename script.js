@@ -76,7 +76,8 @@ const
  rotation = rangeInputs.slice(0,3),
  scale = rangeInputs.slice(3,6),
  translation = rangeInputs.slice(6,9),
- fov = rangeInputs[9];
+ fov = rangeInputs[9],
+ cameraAngle = rangeInputs[10];
 
 
 webglUtils.resizeCanvasToDisplaySize(gl.canvas);
@@ -84,6 +85,7 @@ webglUtils.resizeCanvasToDisplaySize(gl.canvas);
 
 
 function drawScene(e){
+	const radius = 200;
 	gl.enable(gl.CULL_FACE);
 	gl.enable(gl.DEPTH_TEST);
     webglUtils.resizeCanvasToDisplaySize(gl.canvas);
@@ -116,6 +118,14 @@ function drawScene(e){
 		 zFar = 2000;
 		matrix = m4.perspective(fieldOfView, aspect, zNear, zFar);
 	}
+	
+	const cameraMatrix = m4.translate(
+		m4.yRotation(Number(cameraAngle.value)),
+		0, 0, radius * 1.5
+	)
+	
+	matrix = m4.multiply(matrix, m4.inverse(cameraMatrix));
+
 	matrix = m4.translate(matrix, Number(translation[0].value), Number(translation[1].value), Number(translation[2].value));
 	matrix = m4.xRotate(matrix, 360-Number(rotation[0].value));
 	matrix = m4.yRotate(matrix, 360-Number(rotation[1].value));
@@ -138,27 +148,45 @@ function drawScene(e){
 drawScene();
 
 rangeInputs.forEach(elem => {
-		elem.addEventListener('input', drawScene);
-		elem.addEventListener('change', drawScene);
-		
-		elem.addEventListener('mousewheel', e => {
-			const input = e.target;
-			const
-			 value = Number(input.value),
-			 max = Number(input.max),
-			 min = Number(input.min);
+	elem.addEventListener('input', drawScene);
+	elem.addEventListener('change', drawScene);
+	
+	elem.addEventListener('mousewheel', e => {
+		const input = e.target;
+		addToSlider(input,Number(input.step||1)*(e.deltaY>0?1:-1));
+	})
+});
 
-			const newValue = (value + Number(input.step||1)*(e.deltaY>0?1:-1));
-
-		input.value = newValue;
-		
-	    if(/^[xyz]_rotation$/.test(input.id)){
-			if(newValue<min)
-				input.value = max;
-			else if(newValue>max)
-				input.value = min;
-		}
-
-		drawScene({target: input})
-		})
-	});
+document.body.addEventListener('keydown', e => {
+	let property;
+	if (e.altKey){
+		property = scale;
+	} else if (e.ctrlKey){
+		property = rotation;
+	} else {
+		property = translation;
+	}
+	const toAdd = Number(property[0].step||1)*(property==translation?5:1);
+	switch(e.code){
+		case 'KeyA':
+			addToSlider(property[0], -toAdd);
+			break;
+		case 'KeyD':
+			addToSlider(property[0], toAdd);
+			break;
+		case 'KeyW':
+			addToSlider(property[2], -toAdd);
+			break;
+		case 'KeyS':
+			addToSlider(property[2], toAdd);
+			break;
+		case 'ShiftLeft':
+			addToSlider(property[1], -toAdd);
+			break;
+		case 'Space':
+			addToSlider(property[1], toAdd);
+			break;
+		default:
+			console.log(e)
+	}
+});
