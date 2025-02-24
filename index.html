@@ -8,54 +8,59 @@
 </head>
 <body>
 <canvas id=cvs></canvas>
-<div style="top:50px">
-	<label>x rotation</label>
-	<input id=x_rotation type=range value=350 min=0 max=359 alt="The image rotates by this angle on x axis">
+<div class=inputContainer style="top:40px">
+	<label>x</label>
+	<input unit=deg type=range value=350 min=0 max=359 alt="The image rotates by this angle on x axis">
 	<output>350</output>
 </div>
-<div style="top:70px">
-	<label>y rotation</label>
-	<input id=y_rotation type=range value=200 min=0 max=359 alt="The image rotates by this angle on y axis">
+<div class=inputContainer style="top:60px">
+	<label>rotation:&nbsp; y</label>
+	<input unit=deg type=range value=200 min=0 max=359 alt="The image rotates by this angle on y axis">
 	<output>200</output>
 </div>
-<div style="top:90px">
-	<label>z rotation</label>
-	<input id=z_rotation type=range value=180 min=0 max=359 alt="The image rotates by this angle on z axis">
+<div class=inputContainer style="top:80px">
+	<label>z</label>
+	<input unit=deg type=range value=180 min=0 max=359 alt="The image rotates by this angle on z axis">
 	<output>180</output>
 </div>
-<div style="top:120px">
-	<label>x scale</label>
-	<input id=x_scale type=range value=1 step=.1 min=-5 max=5 alt="The image expands horizontally by this many times">
+<div class=inputContainer style="top:105px">
+	<label>x</label>
+	<input type=range value=1 step=.1 min=-5 max=5 alt="The image expands horizontally by this many times">
 	<output>1</output>
 </div>
-<div style="top:140px">
-	<label>y scale</label>
-	<input id=y_scale type=range value=1 step=.1 min=-5 max=5 alt="The image expands vertically by this many times">
+<div class=inputContainer style="top:125px">
+	<label>scale:&nbsp; y</label>
+	<input type=range value=1 step=.1 min=-5 max=5 alt="The image expands vertically by this many times">
 	<output>1</output>
 </div>
-<div style="top:160px">
-	<label>z scale</label>
-	<input id=z_scale type=range value=1 step=.1 min=-5 max=5 alt="The image expands in depth by this many times">
+<div class=inputContainer style="top:145px">
+	<label>z</label>
+	<input type=range value=1 step=.1 min=-5 max=5 alt="The image expands in depth by this many times">
 	<output>1</output>
 </div>
-<div style="top:190px">
-	<label>x translation</label>
-	<input id=x_translation type=range value=0 min=-200 max=200 alt="The image moves left by this value">
+<div class=inputContainer style="top:170px">
+	<label>x</label>
+	<input type=range value=0 min=-250 max=250 alt="The image moves left by this value">
 	<output>0</output>
 </div>
-<div style="top:210px">
-	<label>y translation</label>
-	<input id=y_translation type=range  value=0 min=-200 max=200 alt="The image moves down by this value">
+<div class=inputContainer style="top:190px">
+	<label>translation:&nbsp; y</label>
+	<input type=range  value=0 min=-250 max=250 alt="The image moves down by this value">
 	<output>0</output>
 </div>
-<div style="top:230px">
-	<label>z translation</label>
-	<input id=z_translation type=range  value=-360 min=-1000 max=1 alt="The image moves in depth by this value">
+<div class=inputContainer style="top:210px">
+	<label>z</label>
+	<input type=range  value=-360 min=-1000 max=5 alt="The image moves in depth by this value">
 	<output>-360</output>
 </div>
-<div style="top:260px">
+<div class=inputContainer style="top:235px">
 	<label>FOV</label>
-	<input id=fov type=range  value=60 min=0 max=179 alt="The field of view of the camera">
+	<input unit=deg type=range  value=60 min=0 max=179 alt="The field of view of the camera">
+	<output>60</output>
+</div>
+<div class=inputContainer style="top:260px">
+	<label>camera angle</label>
+	<input unit=deg type=range  value=60 min=0 max=359 alt="The field of view of the camera">
 	<output>60</output>
 </div>
 <script src="https://webgl2fundamentals.org/webgl/resources/webgl-utils.js"></script>

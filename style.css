@@ -7,17 +7,53 @@ body {
   height: 100vh;
   display: block;
 }
-div {
+.inputContainer {
 	appearance: auto;
 	position: absolute;
 	left: 60%;
+  font-size: 0.8em;
+  text-shadow:
+  -.5px 0 #FFF,
+  .5px -.5px 0 #FFF,
+  -.5px .5px 0 #FFF,
+  .5px .5px 0 #FFF;
 }
-div label {
+.inputContainer label {
 	position: absolute;
 	text-align: end;
 	left:-150px;
 	width:150px;
 	white-space: nowrap;
+}
+
+input[type=range] {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 7px;
+  background: #e2e2e2;
+  opacity: .7;
+  border-radius: 2px;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+
+  &::-webkit-slider-thumb {
+    appearance: none;
+    width: 12px;
+    height: 12px;
+    border-radius: 100%;
+    background: #04AA6D;
+    cursor: pointer;
+  }
+  &::-moz-range-thumb {
+    width: 12px;
+    height: 12px;
+    border-radius: 100%;
+    background: #04AA6D;
+    cursor: pointer;
+  }
+  &:hover {
+    opacity: 1;
+  }
 }
 
 input[alt]:hover::after {
@@ -32,4 +68,8 @@ input[alt]:hover::after {
     width: max-content;
     padding: 3px;
     z-index: 500;
+  }
+
+  input[unit=deg] + output::after{
+    content:'°';
   }
