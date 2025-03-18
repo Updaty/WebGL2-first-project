@@ -13,10 +13,9 @@ const program = createProgramFromSources(gl, [vertexShaderSource, fragmentShader
 
 // look up where the vertex data needs to go.
 const positionAttribLocation = gl.getAttribLocation(program, 'a_position');
-const colorAttributeLocation = gl.getAttribLocation(program, 'a_color');
+const texcoordAttributeLocation = gl.getAttribLocation(program, 'a_texcoord');
 
 // look up uniform locations
-const colorLocation =  gl.getUniformLocation(program, "u_color");
 const matrixLocation = gl.getUniformLocation(program, "u_matrix");
 
 //Create a buffer
@@ -46,28 +45,52 @@ setGeometry(gl);
 	gl.vertexAttribPointer(
 		positionAttribLocation, size, type, normalize, stride, offset)
 }
-				
-// create the color buffer, make it the current ARRAY_BUFFER
-// and copy in the color values
-const colorBuffer = gl.createBuffer();
-gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
-setColors(gl);
+
+// create the texcoord buffer, make it the current ARRAY_BUFFER
+// and copy in the texcoord values
+var texcoordBuffer = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, texcoordBuffer);
+setTexcoords(gl);
 
 // Turn on the attribute
-gl.enableVertexAttribArray(colorAttributeLocation);
- 
-// Tell the attribute how to get data out of colorBuffer (ARRAY_BUFFER)
+gl.enableVertexAttribArray(texcoordAttributeLocation);
+	
 {
+	// Tell the attribute how to get data out of texcoordBuffer (ARRAY_BUFFER)
 	const
-	 size = 3,          // 3 components per iteration
-	 type = gl.UNSIGNED_BYTE,   // the data is 8bit unsigned bytes
-	 normalize = true,  // convert from 0-255 to 0.0-1.0
-	 stride = 0,        // 0 = move forward size * sizeof(type) each iteration to get the next color
-	 offset = 0;        // start at the beginning of the buffer
+	size = 2,          // 2 components per iteration
+	type = gl.FLOAT,   // the data is 32bit floating point values
+	normalize = true,  // convert from 0-255 to 0.0-1.0
+	stride = 0,        // 0 = move forward size * sizeof(type) each iteration to get the next color
+	offset = 0;        // start at the beginning of the buffer
 	gl.vertexAttribPointer(
-		colorAttributeLocation, size, type, normalize, stride, offset);
+		texcoordAttributeLocation, size, type, normalize, stride, offset);
 }
 
+// Create a texture.
+var texture = gl.createTexture();
+
+// use texture unit 0
+gl.activeTexture(gl.TEXTURE0 + 0);
+
+// bind to the TEXTURE_2D bind point of texture unit 0
+gl.bindTexture(gl.TEXTURE_2D, texture);
+
+// Fill the texture with a 1x1 blue pixel.
+gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE,
+			new Uint8Array([0, 0, 255, 255]));
+
+// Asynchronously load an image
+const image = new Image();
+image.src = "./1000000420.jpg";
+image.addEventListener('load', () => {
+// Now that the image has loaded make copy it to the texture.
+gl.bindTexture(gl.TEXTURE_2D, texture);
+gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+gl.generateMipmap(gl.TEXTURE_2D);
+
+requestAnimationFrame(drawScene);
+});
 
 
 const rangeInputs = Array.from(document.querySelectorAll('input[type=range]'));
@@ -119,6 +142,10 @@ function drawScene(e){
 		matrix = m4.perspective(fieldOfView, aspect, zNear, zFar);
 	}
 	
+	const cameraPosition = [0, 0, 200];
+    const up = [0, 1, 0];
+    const target = translation.map(e=>Number(e.value));
+
 	const cameraMatrix = m4.translate(
 		m4.yRotation(Number(cameraAngle.value)),
 		0, 0, radius * 1.5
@@ -145,7 +172,6 @@ function drawScene(e){
 		gl.drawArrays(primitiveType, offset, count);
 	}
 }
-drawScene();
 
 rangeInputs.forEach(elem => {
 	elem.addEventListener('input', drawScene);
