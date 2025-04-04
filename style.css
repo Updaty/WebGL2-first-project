@@ -60,6 +60,7 @@ input[alt]:hover::after {
     content: attr(alt);
     position: absolute;
     font-size: .7em;
+    color: #8a8278;
     top: -80%;
     left: -10px;
     background: antiquewhite;

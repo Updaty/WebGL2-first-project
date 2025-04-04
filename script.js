@@ -106,6 +106,8 @@ const
 webglUtils.resizeCanvasToDisplaySize(gl.canvas);
 
 
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
 
 function drawScene(e){
 	const radius = 200;
@@ -126,7 +128,7 @@ function drawScene(e){
     // Bind the attribute/buffer set we want.
     gl.bindVertexArray(vao);
 
-	if(e && e.target.type=='range') {
+	if(e && e.target?.type=='range') {
 		const changedSlider = e.target;
 		changedSlider.nextElementSibling.value = changedSlider.value;
 	}
