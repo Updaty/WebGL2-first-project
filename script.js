@@ -14,9 +14,11 @@ const program = createProgramFromSources(gl, [vertexShaderSource, fragmentShader
 // look up where the vertex data needs to go.
 const positionAttribLocation = gl.getAttribLocation(program, 'a_position');
 const texcoordAttributeLocation = gl.getAttribLocation(program, 'a_texcoord');
+const normalLocation = gl.getAttribLocation(program, "a_normal");
 
 // look up uniform locations
 const matrixLocation = gl.getUniformLocation(program, "u_matrix");
+const reverseLightDirectionLocation = gl.getUniformLocation(program, "u_reverseLightDirection");
 
 //Create a buffer
 const positionBuffer = gl.createBuffer();
@@ -48,7 +50,7 @@ setGeometry(gl);
 
 // create the texcoord buffer, make it the current ARRAY_BUFFER
 // and copy in the texcoord values
-var texcoordBuffer = gl.createBuffer();
+const texcoordBuffer = gl.createBuffer();
 gl.bindBuffer(gl.ARRAY_BUFFER, texcoordBuffer);
 setTexcoords(gl);
 
@@ -68,7 +70,7 @@ gl.enableVertexAttribArray(texcoordAttributeLocation);
 }
 
 // Create a texture.
-var texture = gl.createTexture();
+const texture = gl.createTexture();
 
 // use texture unit 0
 gl.activeTexture(gl.TEXTURE0 + 0);
@@ -78,18 +80,29 @@ gl.bindTexture(gl.TEXTURE_2D, texture);
 
 // Fill the texture with a 1x1 blue pixel.
 gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE,
-			new Uint8Array([0, 0, 255, 255]));
+	new Uint8Array([0, 0, 255, 255]));
 
+
+// Create a buffer for normals.
+const buffer = gl.createBuffer();
+gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+gl.enableVertexAttribArray(normalLocation);
+gl.vertexAttribPointer(normalLocation, 3, gl.FLOAT, false, 0, 0);
+
+// Set normals.
+setNormals(gl);
+
+			
 // Asynchronously load an image
 const image = new Image();
 image.src = "./1000000420.jpg";
 image.addEventListener('load', () => {
-// Now that the image has loaded make copy it to the texture.
-gl.bindTexture(gl.TEXTURE_2D, texture);
-gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-gl.generateMipmap(gl.TEXTURE_2D);
-
-requestAnimationFrame(drawScene);
+	// Now that the image has loaded make copy it to the texture.
+	gl.bindTexture(gl.TEXTURE_2D, texture);
+	gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+	gl.generateMipmap(gl.TEXTURE_2D);
+	
+	requestAnimationFrame(drawScene);
 });
 
 
@@ -134,20 +147,14 @@ function drawScene(e){
 	}
 
 	//Compute the matrix
-	let matrix;
-	{
-		const 
-		 fieldOfView = Number(fov.value),
-		 aspect = gl.canvas.clientWidth / gl.canvas.clientHeight,
-		 zNear = 1,
-		 zFar = 2000;
-		matrix = m4.perspective(fieldOfView, aspect, zNear, zFar);
-	}
+	let matrix = m4.perspective(
+			Number(fov.value),                              //field of view
+			gl.canvas.clientWidth / gl.canvas.clientHeight, //aspect ratio
+			 1,                                             //z near
+			 2000                                           //z far
+	);
 	
-	const cameraPosition = [0, 0, 200];
-    const up = [0, 1, 0];
-    const target = translation.map(e=>Number(e.value));
-
+	
 	const cameraMatrix = m4.translate(
 		m4.yRotation(Number(cameraAngle.value)),
 		0, 0, radius * 1.5
@@ -163,7 +170,8 @@ function drawScene(e){
 	
 	gl.uniformMatrix4fv(matrixLocation, false, matrix);
 
-
+	// set the light direction.
+	gl.uniform3fv(reverseLightDirectionLocation, v3.normalize([0.5, 0.7, 1]));
 		
 	//Draw a distinct triangle.
 	{

@@ -7,12 +7,17 @@ const vertexShaderSource = (`#version 300 es
 // It will receive data from a buffer
 in vec4 a_position;
 in vec2 a_texcoord;
+in vec3 a_normal;
 
 // A matrix to transform the positions by
 uniform mat4 u_matrix;
 
 // a varying to pass the texture coordinates to the fragment shader
 out vec2 v_texcoord;
+
+ 
+// varying to pass the normal to the fragment shader
+out vec3 v_normal;
 
 // all shaders have a main function
 void main() {
@@ -21,6 +26,9 @@ void main() {
 
   // Pass the texcoord to the fragment shader.
   v_texcoord = a_texcoord;
+
+  // Pass the normal to the fragment shader
+  v_normal = a_normal;
 }
 `);
 
@@ -32,6 +40,11 @@ precision highp float;
 // Passed in from the vertex shader.
 in vec2 v_texcoord;
 
+// Passed in and varied from the vertex shader.
+in vec3 v_normal;
+ 
+uniform vec3 u_reverseLightDirection;
+
 // The texture.
 uniform sampler2D u_texture;
 
@@ -39,7 +52,18 @@ uniform sampler2D u_texture;
 out vec4 outColor;
 
 void main() {
+  // because v_normal is a varying it's interpolated
+  // so it will not be a unit vector. Normalizing it
+  // will make it a unit vector again
+  vec3 normal = normalize(v_normal);
+ 
+  // compute the light by taking the dot product
+  // of the normal to the light's reverse direction
+  float light = dot(normal, u_reverseLightDirection);
+
   outColor = texture(u_texture, v_texcoord);
+
+  outColor.rgb *= light;
 }
 `);
 
