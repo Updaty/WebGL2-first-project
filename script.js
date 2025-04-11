@@ -17,8 +17,11 @@ const texcoordAttributeLocation = gl.getAttribLocation(program, 'a_texcoord');
 const normalLocation = gl.getAttribLocation(program, "a_normal");
 
 // look up uniform locations
-const matrixLocation = gl.getUniformLocation(program, "u_matrix");
+const worldViewMatrixLocation = gl.getUniformLocation(program, "u_worldViewProjection");
+const worldInverseTransposeMatrixLocation = gl.getUniformLocation(program, "u_worldInverseTranspose");
+const worldMatrixLocation = gl.getUniformLocation(program, "u_world");
 const reverseLightDirectionLocation = gl.getUniformLocation(program, "u_reverseLightDirection");
+const lightPositionLocation = gl.getUniformLocation(program, "u_lightPosition");
 
 //Create a buffer
 const positionBuffer = gl.createBuffer();
@@ -160,6 +163,15 @@ function drawScene(e){
 		0, 0, radius * 1.5
 	)
 	
+	const rotationMatrix =  m4.zRotate(
+							m4.yRotate(
+							m4.xRotation(
+								360-Number(rotation[0].value)),
+								360-Number(rotation[1].value)),
+								360-Number(rotation[2].value));
+	
+	const worldInverseTransposeMatrix = m4.transpose(m4.inverse(rotationMatrix));
+
 	matrix = m4.multiply(matrix, m4.inverse(cameraMatrix));
 
 	matrix = m4.translate(matrix, Number(translation[0].value), Number(translation[1].value), Number(translation[2].value));
@@ -168,19 +180,19 @@ function drawScene(e){
 	matrix = m4.zRotate(matrix, 360-Number(rotation[2].value));
 	matrix = m4.scale(matrix, Number(scale[0].value),Number(scale[1].value),Number(scale[2].value));
 	
-	gl.uniformMatrix4fv(matrixLocation, false, matrix);
+	gl.uniformMatrix4fv(worldMatrixLocation, false, rotationMatrix);
+	gl.uniformMatrix4fv(worldViewMatrixLocation, false, matrix);
+	gl.uniformMatrix4fv(worldInverseTransposeMatrixLocation, false, worldInverseTransposeMatrix);
 
 	// set the light direction.
-	gl.uniform3fv(reverseLightDirectionLocation, v3.normalize([0.5, 0.7, 1]));
+	gl.uniform3fv(lightPositionLocation, [20, 30, -50]);
 		
 	//Draw a distinct triangle.
-	{
-		const
-		 primitiveType = gl.TRIANGLES,
-		 offset = 0,
-		 count = 16 * 6;
-		gl.drawArrays(primitiveType, offset, count);
-	}
+	gl.drawArrays(
+		gl.TRIANGLES, //primitiveType
+		0,            //offset
+		16 * 6        //count
+	);
 }
 
 rangeInputs.forEach(elem => {

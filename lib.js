@@ -10,7 +10,11 @@ in vec2 a_texcoord;
 in vec3 a_normal;
 
 // A matrix to transform the positions by
-uniform mat4 u_matrix;
+uniform mat4 u_worldInverseTranspose;
+uniform mat4 u_worldViewProjection;
+uniform mat4 u_world;
+
+uniform vec3 u_lightPosition;
 
 // a varying to pass the texture coordinates to the fragment shader
 out vec2 v_texcoord;
@@ -18,17 +22,26 @@ out vec2 v_texcoord;
  
 // varying to pass the normal to the fragment shader
 out vec3 v_normal;
+out vec3 v_surfaceToLight;
 
 // all shaders have a main function
 void main() {
   // Multiply the position by the matrix.
-  gl_Position = u_matrix * a_position;
+  gl_Position = u_worldViewProjection * a_position;
+
+
+  // compute the world position of the surface
+  vec3 surfaceWorldPosition = (u_world * a_position).xyz;
+
+  // compute the vector of the surface to the light
+  // and pass it to the fragment shader
+  v_surfaceToLight = u_lightPosition - surfaceWorldPosition;
 
   // Pass the texcoord to the fragment shader.
   v_texcoord = a_texcoord;
 
   // Pass the normal to the fragment shader
-  v_normal = a_normal;
+  v_normal = mat3(u_worldInverseTranspose) * a_normal;
 }
 `);
 
@@ -39,10 +52,9 @@ precision highp float;
 
 // Passed in from the vertex shader.
 in vec2 v_texcoord;
-
-// Passed in and varied from the vertex shader.
 in vec3 v_normal;
- 
+in vec3 v_surfaceToLight;
+
 uniform vec3 u_reverseLightDirection;
 
 // The texture.
@@ -56,10 +68,12 @@ void main() {
   // so it will not be a unit vector. Normalizing it
   // will make it a unit vector again
   vec3 normal = normalize(v_normal);
- 
+  
+  vec3 surfaceToLightDirection = normalize(v_surfaceToLight);
+
   // compute the light by taking the dot product
   // of the normal to the light's reverse direction
-  float light = dot(normal, u_reverseLightDirection);
+  float light = dot(normal, surfaceToLightDirection);
 
   outColor = texture(u_texture, v_texcoord);
 
@@ -302,12 +316,12 @@ const normals = new Float32Array([
         0, 1, 0,
 
         // top rung right
-        1, 0, 0,
-        1, 0, 0,
-        1, 0, 0,
-        1, 0, 0,
-        1, 0, 0,
-        1, 0, 0,
+        -1, 0, 0,
+        -1, 0, 0,
+        -1, 0, 0,
+        -1, 0, 0,
+        -1, 0, 0,
+        -1, 0, 0,
 
         // under top rung
         0, -1, 0,
@@ -318,12 +332,12 @@ const normals = new Float32Array([
         0, -1, 0,
 
         // between top rung and middle
-        1, 0, 0,
-        1, 0, 0,
-        1, 0, 0,
-        1, 0, 0,
-        1, 0, 0,
-        1, 0, 0,
+        -1, 0, 0,
+        -1, 0, 0,
+        -1, 0, 0,
+        -1, 0, 0,
+        -1, 0, 0,
+        -1, 0, 0,
 
         // top of middle rung
         0, 1, 0,
@@ -334,12 +348,12 @@ const normals = new Float32Array([
         0, 1, 0,
 
         // right of middle rung
-        1, 0, 0,
-        1, 0, 0,
-        1, 0, 0,
-        1, 0, 0,
-        1, 0, 0,
-        1, 0, 0,
+        -1, 0, 0,
+        -1, 0, 0,
+        -1, 0, 0,
+        -1, 0, 0,
+        -1, 0, 0,
+        -1, 0, 0,
 
         // bottom of middle rung.
         0, -1, 0,
@@ -350,12 +364,12 @@ const normals = new Float32Array([
         0, -1, 0,
 
         // right of bottom
-        1, 0, 0,
-        1, 0, 0,
-        1, 0, 0,
-        1, 0, 0,
-        1, 0, 0,
-        1, 0, 0,
+        -1, 0, 0,
+        -1, 0, 0,
+        -1, 0, 0,
+        -1, 0, 0,
+        -1, 0, 0,
+        -1, 0, 0,
 
         // bottom
         0, -1, 0,
@@ -366,12 +380,12 @@ const normals = new Float32Array([
         0, -1, 0,
 
         // left side
-        -1, 0, 0,
-        -1, 0, 0,
-        -1, 0, 0,
-        -1, 0, 0,
-        -1, 0, 0,
-        -1, 0, 0,
+        1, 0, 0,
+        1, 0, 0,
+        1, 0, 0,
+        1, 0, 0,
+        1, 0, 0,
+        1, 0, 0,
 ]);
 
 function setNormals(gl) {
@@ -854,6 +868,13 @@ const m4 = {
            (tmp_20 * m12 + tmp_23 * m22 + tmp_17 * m02)),
     ];
   },
+  transpose: (m) =>
+    [
+      m[0], m[4], m[8], m[12],
+      m[1], m[5], m[9], m[13],
+      m[2], m[6], m[10], m[14],
+      m[3], m[7], m[11], m[15],
+    ],
   translate: (m, tx, ty, tz) =>
     m4.multiply(m, m4.translation(tx, ty, tz)),
  
