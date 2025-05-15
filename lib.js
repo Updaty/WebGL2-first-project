@@ -15,6 +15,7 @@ uniform mat4 u_worldViewProjection;
 uniform mat4 u_world;
 
 uniform vec3 u_lightPosition;
+uniform vec3 u_viewWorldPosition;
 
 // a varying to pass the texture coordinates to the fragment shader
 out vec2 v_texcoord;
@@ -22,7 +23,9 @@ out vec2 v_texcoord;
  
 // varying to pass the normal to the fragment shader
 out vec3 v_normal;
+
 out vec3 v_surfaceToLight;
+out vec3 v_surfaceToView;
 
 // all shaders have a main function
 void main() {
@@ -36,6 +39,10 @@ void main() {
   // compute the vector of the surface to the light
   // and pass it to the fragment shader
   v_surfaceToLight = u_lightPosition - surfaceWorldPosition;
+
+  // compute the vector of the surface to the light
+  // and pass it to the fragment shader
+  v_surfaceToView = u_viewWorldPosition - surfaceWorldPosition;
 
   // Pass the texcoord to the fragment shader.
   v_texcoord = a_texcoord;
@@ -53,12 +60,17 @@ precision highp float;
 // Passed in from the vertex shader.
 in vec2 v_texcoord;
 in vec3 v_normal;
-in vec3 v_surfaceToLight;
 
-uniform vec3 u_reverseLightDirection;
+in vec3 v_surfaceToLight;
+in vec3 v_surfaceToView;
 
 // The texture.
 uniform sampler2D u_texture;
+uniform vec3 u_lightDirection;
+uniform float u_limit;
+
+//Describes, how metallic the material appears
+uniform float u_shininess;
 
 // we need to declare an output for the fragment shader
 out vec4 outColor;
@@ -70,14 +82,26 @@ void main() {
   vec3 normal = normalize(v_normal);
   
   vec3 surfaceToLightDirection = normalize(v_surfaceToLight);
+  vec3 surfaceToViewDirection = normalize(v_surfaceToView);
+  vec3 halfVector = normalize(surfaceToLightDirection + surfaceToLightDirection);
 
-  // compute the light by taking the dot product
-  // of the normal to the light's reverse direction
-  float light = dot(normal, surfaceToLightDirection);
+  float light = 0.;
+  
+  float specular = 0.;
+
+  float dotFromLightDirection = dot(surfaceToLightDirection, -u_lightDirection);
+  if(dotFromLightDirection >= u_limit){
+    light = dot(normal, surfaceToLightDirection);
+    if (light > 0.0) {
+      specular = pow(dot(normal, halfVector), u_shininess);
+    }
+  }
 
   outColor = texture(u_texture, v_texcoord);
 
   outColor.rgb *= light;
+
+  outColor.rgb += specular;
 }
 `);
 

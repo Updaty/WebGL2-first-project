@@ -20,8 +20,11 @@ const normalLocation = gl.getAttribLocation(program, "a_normal");
 const worldViewMatrixLocation = gl.getUniformLocation(program, "u_worldViewProjection");
 const worldInverseTransposeMatrixLocation = gl.getUniformLocation(program, "u_worldInverseTranspose");
 const worldMatrixLocation = gl.getUniformLocation(program, "u_world");
-const reverseLightDirectionLocation = gl.getUniformLocation(program, "u_reverseLightDirection");
 const lightPositionLocation = gl.getUniformLocation(program, "u_lightPosition");
+const viewWorldPositionLocation = gl.getUniformLocation(program, "u_viewWorldPosition");
+const shininessLocation = gl.getUniformLocation(program, "u_shininess");
+var lightDirectionLocation = gl.getUniformLocation(program, "u_lightDirection");
+var limitLocation = gl.getUniformLocation(program, "u_limit");
 
 //Create a buffer
 const positionBuffer = gl.createBuffer();
@@ -116,7 +119,8 @@ const
  scale = rangeInputs.slice(3,6),
  translation = rangeInputs.slice(6,9),
  fov = rangeInputs[9],
- cameraAngle = rangeInputs[10];
+ cameraAngle = rangeInputs[10],
+ shininess = rangeInputs[11];
 
 
 webglUtils.resizeCanvasToDisplaySize(gl.canvas);
@@ -157,6 +161,8 @@ function drawScene(e){
 			 2000                                           //z far
 	);
 	
+
+	const camera = [100, 150, 200];
 	
 	const cameraMatrix = m4.translate(
 		m4.yRotation(Number(cameraAngle.value)),
@@ -184,8 +190,17 @@ function drawScene(e){
 	gl.uniformMatrix4fv(worldViewMatrixLocation, false, matrix);
 	gl.uniformMatrix4fv(worldInverseTransposeMatrixLocation, false, worldInverseTransposeMatrix);
 
-	// set the light direction.
+	// set the light properties.
 	gl.uniform3fv(lightPositionLocation, [20, 30, -50]);
+
+	gl.uniform3fv(viewWorldPositionLocation, camera);
+
+	gl.uniform3fv(lightDirectionLocation, [0, -1, 0]);
+
+    gl.uniform1f(limitLocation, Math.cos(degToRad(30)));
+	 
+	// set the shininess
+	gl.uniform1f(shininessLocation, shininess.value);
 		
 	//Draw a distinct triangle.
 	gl.drawArrays(

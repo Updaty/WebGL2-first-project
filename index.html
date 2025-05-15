@@ -45,22 +45,27 @@
 </div>
 <div class=inputContainer style="top:190px">
 	<label>translation:&nbsp; y</label>
-	<input type=range  value=0 min=-250 max=250 alt="The image moves down by this value">
+	<input type=range value=0 min=-250 max=250 alt="The image moves down by this value">
 	<output>0</output>
 </div>
 <div class=inputContainer style="top:210px">
 	<label>z</label>
-	<input type=range  value=-360 min=-1000 max=5 alt="The image moves in depth by this value">
+	<input type=range value=-360 min=-1000 max=5 alt="The image moves in depth by this value">
 	<output>-360</output>
 </div>
 <div class=inputContainer style="top:235px">
 	<label>FOV</label>
-	<input unit=deg type=range  value=60 min=0 max=179 alt="The field of view of the camera">
+	<input unit=deg type=range value=60 min=0 max=179 alt="The field of view of the camera">
 	<output>60</output>
 </div>
 <div class=inputContainer style="top:260px">
 	<label>camera angle</label>
-	<input unit=deg type=range  value=20 min=0 max=359 alt="The angle of y rotation of the camera">
+	<input unit=deg type=range value=20 min=0 max=359 alt="The angle of y rotation of the camera">
+	<output>20</output>
+</div>
+<div class=inputContainer style="top:285px">
+	<label>shininess</label>
+	<input type=range value=20 step=.5 min=1 max=250 alt="The angle of y rotation of the camera">
 	<output>20</output>
 </div>
 <script src="https://webgl2fundamentals.org/webgl/resources/webgl-utils.js"></script>
