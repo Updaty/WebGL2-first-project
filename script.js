@@ -23,8 +23,9 @@ const worldMatrixLocation = gl.getUniformLocation(program, "u_world");
 const lightPositionLocation = gl.getUniformLocation(program, "u_lightPosition");
 const viewWorldPositionLocation = gl.getUniformLocation(program, "u_viewWorldPosition");
 const shininessLocation = gl.getUniformLocation(program, "u_shininess");
-var lightDirectionLocation = gl.getUniformLocation(program, "u_lightDirection");
-var limitLocation = gl.getUniformLocation(program, "u_limit");
+const lightDirectionLocation = gl.getUniformLocation(program, "u_lightDirection");
+const innerLimitLocation = gl.getUniformLocation(program, "u_innerLimit");
+const outerLimitLocation = gl.getUniformLocation(program, "u_outerLimit");
 
 //Create a buffer
 const positionBuffer = gl.createBuffer();
@@ -197,7 +198,8 @@ function drawScene(e){
 
 	gl.uniform3fv(lightDirectionLocation, [0, -1, 0]);
 
-    gl.uniform1f(limitLocation, Math.cos(degToRad(30)));
+    gl.uniform1f(innerLimitLocation, Math.cos(degToRad(20)));
+    gl.uniform1f(outerLimitLocation, Math.cos(degToRad(40)));
 	 
 	// set the shininess
 	gl.uniform1f(shininessLocation, shininess.value);

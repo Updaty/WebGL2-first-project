@@ -67,7 +67,9 @@ in vec3 v_surfaceToView;
 // The texture.
 uniform sampler2D u_texture;
 uniform vec3 u_lightDirection;
-uniform float u_limit;
+
+uniform float u_innerLimit;
+uniform float u_outerLimit;
 
 //Describes, how metallic the material appears
 uniform float u_shininess;
@@ -85,22 +87,15 @@ void main() {
   vec3 surfaceToViewDirection = normalize(v_surfaceToView);
   vec3 halfVector = normalize(surfaceToLightDirection + surfaceToLightDirection);
 
-  float light = 0.;
-  
-  float specular = 0.;
 
   float dotFromLightDirection = dot(surfaceToLightDirection, -u_lightDirection);
-  if(dotFromLightDirection >= u_limit){
-    light = dot(normal, surfaceToLightDirection);
-    if (light > 0.0) {
-      specular = pow(dot(normal, halfVector), u_shininess);
-    }
-  }
+
+  float inLight = smoothstep(u_outerLimit, u_innerLimit, dotFromLightDirection);
+  float light = inLight * dot(normal, surfaceToLightDirection);
+  float specular = inLight * pow(dot(normal, halfVector), u_shininess);
 
   outColor = texture(u_texture, v_texcoord);
-
   outColor.rgb *= light;
-
   outColor.rgb += specular;
 }
 `);
